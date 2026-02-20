@@ -537,35 +537,145 @@ const style = { transform: `translateY(${wave}px)` };
 ```tsx
 import { Audio, staticFile } from 'remotion';
 
-// 나레이션 (씬별)
-<Audio src={staticFile('audio/narration/scene-01.mp3')} />
+// 나레이션 (씬별) — 모노레포 경로: public/videos/{category}/{name}/narration/
+<Audio src={staticFile('videos/explainers/year-end-tax-tips/narration/scene-01.mp3')} />
 
 // 배경 음악 (볼륨 낮춤)
 <Audio
-  src={staticFile('audio/bgm/background.mp3')}
+  src={staticFile('videos/explainers/year-end-tax-tips/bgm/background.mp3')}
   volume={0.2}
 />
 
 // 특정 구간만 재생
 <Audio
-  src={staticFile('audio/narration/scene-01.mp3')}
+  src={staticFile('videos/explainers/year-end-tax-tips/narration/scene-01.mp3')}
   startFrom={30}   // 1초 후부터
   endAt={120}      // 4초까지
 />
 ```
 
-**오디오 파일 구조**
+**오디오 파일 구조 (모노레포)**
 
 ```
-public/
-└── audio/
-    ├── narration/
-    │   ├── scene-01.mp3
-    │   ├── scene-02.mp3
-    │   └── ...
-    └── bgm/
-        └── background.mp3
+public/videos/{category}/{name}/
+├── narration/           ← TTS 나레이션
+│   ├── scene-01.mp3
+│   ├── scene-02.mp3
+│   └── ...
+├── bgm/                 ← 배경 음악
+│   └── background.mp3
+└── assets/              ← 기타 에셋 (이미지, 폰트, 음성 레퍼런스)
+    └── my-voice.wav
 ```
+
+---
+
+## GIF 통합 (@remotion/gif)
+
+`@remotion/gif` 패키지로 GIPHY 등의 GIF를 씬에 프레임 동기화하여 삽입한다.
+API 키 없이 GIPHY 직접 URL만으로 사용 가능.
+
+```bash
+npm install @remotion/gif
+```
+
+```tsx
+import { Gif } from '@remotion/gif';
+import { interpolate, useCurrentFrame } from 'remotion';
+
+const frame = useCurrentFrame();
+
+// GIF fadeIn/fadeOut (등장 250f, 퇴장 500f)
+const gifOpacity = interpolate(
+  frame,
+  [250, 265, 500, 515],
+  [0, 1, 1, 0],
+  { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
+);
+
+// 리액션 GIF — 절대 위치, 400x400 크기 권장
+<div style={{
+  position: 'absolute',
+  right: 60,
+  bottom: 80,
+  opacity: gifOpacity,
+  width: 400,
+  height: 400,
+}}>
+  <Gif
+    src="https://media2.giphy.com/media/26ufdipQqU2lhNA4g/giphy.gif"
+    width={400}
+    height={400}
+    fit="contain"
+  />
+</div>
+```
+
+**GIF 사용 규칙**
+- GIPHY URL 형식: `https://media{N}.giphy.com/media/{ID}/giphy.gif`
+- 크기: 400x400px 권장 (240은 너무 작음)
+- 위치: `position: absolute` + `right/left: 60, bottom: 80`
+- 씬별 1개, 내용과 맞는 리액션 GIF 선택
+- fadeIn/fadeOut 15프레임으로 자연스럽게 등장/퇴장
+- 스토리보드 단계에서 씬별 GIF를 미리 기획
+
+---
+
+## 씬 전환 — Series + offset 크로스페이드
+
+`Series` + `offset`으로 씬 간 부드러운 크로스페이드 전환을 구현한다.
+
+```tsx
+import { AbsoluteFill, Series } from 'remotion';
+
+const OVERLAP = 15; // 0.5초 크로스페이드
+
+export const FullVideo: React.FC = () => (
+  <AbsoluteFill style={{ backgroundColor: '#0F172A' }}>
+    <Series>
+      {/* 첫 씬은 offset 없이 */}
+      <Series.Sequence durationInFrames={330}>
+        <Scene01Hook />
+      </Series.Sequence>
+
+      {/* 이후 씬부터 -OVERLAP으로 크로스페이드 */}
+      <Series.Sequence durationInFrames={690} offset={-OVERLAP}>
+        <Scene02Background />
+      </Series.Sequence>
+
+      <Series.Sequence durationInFrames={1080} offset={-OVERLAP}>
+        <Scene03YouthTax />
+      </Series.Sequence>
+    </Series>
+  </AbsoluteFill>
+);
+```
+
+**크로스페이드 규칙**
+- `offset={-15}` (0.5초) 권장
+- 전체 프레임 = 씬 합계 - (OVERLAP × (씬 수 - 1))
+- `AbsoluteFill`에 배경색 필수 (투명 방지)
+- 각 씬에 fadeIn/fadeOut 15프레임 적용
+
+---
+
+## Remotion 확장 패키지
+
+API 키 없이 무료로 사용 가능한 패키지 목록:
+
+| 패키지 | 용도 |
+|--------|------|
+| `@remotion/gif` | GIF 프레임 동기화 렌더링 |
+| `@remotion/transitions` | 씬 전환 효과 (fade, slide, wipe) |
+| `@remotion/shapes` | SVG 도형 (원, 삼각형, 별 등) |
+| `@remotion/paths` | SVG 경로 애니메이션 |
+| `@remotion/noise` | Perlin 노이즈 기반 효과 |
+| `@remotion/motion-blur` | 모션 블러 효과 |
+| `@remotion/layout-utils` | 텍스트 크기 자동 조절 |
+| `@remotion/lottie` | Lottie JSON 애니메이션 |
+| `@remotion/captions` | 자막 렌더링 |
+| `@remotion/install-whisper-cpp` | Whisper 음성→자막 자동 생성 |
+| `@remotion/google-fonts` | Google Fonts 로드 |
 
 ---
 

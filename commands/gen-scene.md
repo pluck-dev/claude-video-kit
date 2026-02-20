@@ -37,3 +37,21 @@
 - 모든 시간 단위는 프레임 (초 x fps)
 - 에셋은 staticFile()로 참조 (경로: `videos/{category}/{name}/...`)
 - {VIDEO}/VIDEO.md Phase 3c 상태 업데이트
+
+## GIF 리액션 통합
+- `@remotion/gif` 패키지 사용 (`<Gif src="..." />`)
+- 스토리보드에서 계획된 씬별 GIF URL을 적용
+- GIPHY 직접 URL 사용 (API 키 불필요): `https://media{N}.giphy.com/media/{ID}/giphy.gif`
+- 크기: 400x400px, 위치: 절대 배치 (right/left: 60, bottom: 80)
+- fadeIn/fadeOut 15프레임으로 자연스럽게 등장/퇴장
+
+## 사용 가능한 Remotion 확장 패키지
+- `@remotion/gif` — GIF 프레임 동기화
+- `@remotion/transitions` — 씬 전환 효과
+- `@remotion/shapes` — SVG 도형
+- `@remotion/paths` — SVG 경로 애니메이션
+- `@remotion/noise` — Perlin 노이즈 효과
+- `@remotion/motion-blur` — 모션 블러
+- `@remotion/layout-utils` — 텍스트 크기 자동 조절
+- `@remotion/lottie` — Lottie 애니메이션
+- `@remotion/captions` — 자막 렌더링
