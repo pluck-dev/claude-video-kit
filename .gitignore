@@ -1,0 +1,23 @@
+.DS_Store
+*.backup.*
+
+# Dependencies
+node_modules/
+
+# OMC state
+.omc/
+
+# 환경 변수
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+
+# Remotion 출력물
+output/
