@@ -5,6 +5,12 @@ Remotion Still을 사용하여 YouTube 썸네일 이미지를 생성합니다.
 ## 참조 스킬
 별도 스킬 파일 없음 (이 커맨드 파일에 전체 규칙 포함).
 
+## 경로 규칙
+- 영상 식별: `~/.claude/skills/video-orchestra.md` §3 (영상 식별 로직) 적용
+- `{VIDEO}` = `videos/{category}/{name}/`
+- `{OUTPUT}` = `output/{category}/{name}/`
+- Composition ID: `{name}-thumbnail`
+
 ## 사용법
 ```
 /gen-thumbnail                         ← 기본 썸네일 생성
@@ -14,17 +20,18 @@ Remotion Still을 사용하여 YouTube 썸네일 이미지를 생성합니다.
 ```
 
 ## 실행 절차
-1. 스크립트에서 핵심 메시지 추출 (또는 --text 사용)
+1. {VIDEO}/scripts/에서 핵심 메시지 추출 (또는 --text 사용)
 2. Remotion Thumbnail 컴포넌트 생성/수정
-   - src/scenes/Thumbnail.tsx
-3. Remotion Still로 PNG 생성
+   - {VIDEO}/scenes/Thumbnail.tsx
+3. {VIDEO}/Compositions.tsx에 썸네일 Composition 등록
+4. Remotion Still로 PNG 생성
 ```bash
-npx remotion still src/index.ts Thumbnail output/thumbnails/thumbnail.png
+npx remotion still src/index.ts {name}-thumbnail {OUTPUT}/thumbnails/thumbnail.png
 ```
 
 ## 썸네일 컴포넌트 구조
 ```tsx
-// src/scenes/Thumbnail.tsx
+// {VIDEO}/scenes/Thumbnail.tsx
 export const Thumbnail: React.FC<{
   title: string;
   subtitle?: string;
@@ -49,5 +56,5 @@ export const Thumbnail: React.FC<{
 - 형식: PNG (투명도 불필요), JPEG (파일 크기 최적화)
 
 ## 출력
-- `output/thumbnails/{name}.png` — 썸네일 이미지
-- VIDEO.md Phase 5c 상태 업데이트
+- `{OUTPUT}/thumbnails/{name}.png` — 썸네일 이미지
+- {VIDEO}/VIDEO.md Phase 5c 상태 업데이트

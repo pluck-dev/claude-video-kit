@@ -5,6 +5,10 @@
 ## 참조 스킬
 반드시 `~/.claude/skills/script-writing.md`를 읽고 전체 적용합니다.
 
+## 경로 규칙
+- 영상 식별: `~/.claude/skills/video-orchestra.md` §3 (영상 식별 로직) 적용
+- `{VIDEO}` = `videos/{category}/{name}/`
+
 ## 사용법
 ```
 /write-script [주제]                    ← 기본 튜토리얼 스크립트
@@ -19,11 +23,11 @@
 
 ## 실행 절차
 
-### plandata/ 자료가 있는 경우
-1. plandata/ 분석 → 주제/핵심 메시지 추출
+### {VIDEO}/plandata/ 자료가 있는 경우
+1. {VIDEO}/plandata/ 분석 → 주제/핵심 메시지 추출
 2. 유형에 맞는 구조 적용
 3. 씬 분할 + 나레이션 작성
-4. scripts/ 에 개별 씬 md + 통합 md 생성
+4. {VIDEO}/scripts/ 에 개별 씬 md + 통합 md 생성
 
 ### 자료가 없는 경우 (인터랙티브)
 1. AskUserQuestion으로 질문:
@@ -36,6 +40,6 @@
 3. 사용자 검토 후 수정
 
 ## 출력
-- `scripts/scene-{N}.md` — 씬별 스크립트
-- `scripts/full-script.md` — 전체 통합 스크립트
-- VIDEO.md Phase 1b 상태 업데이트
+- `{VIDEO}/scripts/scene-{N}.md` — 씬별 스크립트
+- `{VIDEO}/scripts/full-script.md` — 전체 통합 스크립트
+- {VIDEO}/VIDEO.md Phase 1b 상태 업데이트

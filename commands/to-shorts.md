@@ -7,6 +7,11 @@
 - `~/.claude/skills/remotion-patterns.md` — Remotion 숏폼 변환 패턴
 - `~/.claude/skills/youtube-seo.md` — 숏폼 SEO 차이점
 
+## 경로 규칙
+- 영상 식별: `~/.claude/skills/video-orchestra.md` §3 (영상 식별 로직) 적용
+- `{VIDEO}` = `videos/{category}/{name}/`
+- `{OUTPUT}` = `output/{category}/{name}/`
+
 ## 사용법
 ```
 /to-shorts                     ← 전체 영상에서 숏폼 하이라이트 생성
@@ -16,14 +21,14 @@
 ```
 
 ## 실행 절차
-1. 스크립트에서 숏폼 적합 구간 추출 (핵심 메시지, 훅)
+1. {VIDEO}/scripts/에서 숏폼 적합 구간 추출 (핵심 메시지, 훅)
 2. 레이아웃 변환: 1920x1080 → 1080x1920
    - 텍스트 크기 증가 (모바일 가독성)
    - 세로 레이아웃 재배치
    - 자막 중앙 하단 배치
-3. 숏폼 Composition 생성 (src/scenes/Shorts-{N}.tsx)
-4. Root.tsx에 숏폼 Composition 등록
-5. 렌더링: output/shorts/{name}.mp4
+3. 숏폼 씬 생성 ({VIDEO}/scenes/Shorts-{N}.tsx)
+4. {VIDEO}/Compositions.tsx에 숏폼 Composition 등록
+5. 렌더링: {OUTPUT}/shorts/{name}-shorts.mp4
 6. 숏폼 SEO 메타데이터 생성
 
 ## 숏폼 규칙
@@ -34,7 +39,7 @@
 - 루프 가능한 구성 권장
 
 ## 출력
-- `src/scenes/Shorts-{N}.tsx` — 숏폼 씬 컴포넌트
-- `output/shorts/{name}.mp4` — 렌더링 결과
-- `publish/{name}-shorts-seo.md` — 숏폼 SEO
-- VIDEO.md Phase 5b 상태 업데이트
+- `{VIDEO}/scenes/Shorts-{N}.tsx` — 숏폼 씬 컴포넌트
+- `{OUTPUT}/shorts/{name}.mp4` — 렌더링 결과
+- `{VIDEO}/publish/{name}-shorts-seo.md` — 숏폼 SEO
+- {VIDEO}/VIDEO.md Phase 5b 상태 업데이트

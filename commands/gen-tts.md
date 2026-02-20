@@ -5,6 +5,11 @@
 ## 참조 스킬
 반드시 `~/.claude/skills/tts-integration.md`를 읽고 전체 적용합니다.
 
+## 경로 규칙
+- 영상 식별: `~/.claude/skills/video-orchestra.md` §3 (영상 식별 로직) 적용
+- `{VIDEO}` = `videos/{category}/{name}/`
+- `{PUBLIC}` = `public/videos/{category}/{name}/`
+
 ## 사용법
 ```
 /gen-tts                               ← 기본 TTS 생성 (Edge TTS)
@@ -18,12 +23,12 @@
 ```
 
 ## 실행 절차
-1. scripts/ 에서 나레이션 텍스트 추출
+1. {VIDEO}/scripts/ 에서 나레이션 텍스트 추출
 2. [VISUAL], [TRANSITION] 등 태그 제거
 3. 서비스 API 호출 → mp3 생성
-4. audio/narration/ 에 저장
+4. {PUBLIC}/narration/ 에 저장
 5. timing.json 생성 (씬별 길이)
-6. VIDEO.md Phase 2a 상태 업데이트
+6. {VIDEO}/VIDEO.md Phase 2a 상태 업데이트
 
 ## --skip 동작
 - Phase 2a를 [-] 스킵 상태로 표기
