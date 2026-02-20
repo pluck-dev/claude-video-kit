@@ -1,0 +1,73 @@
+{
+  "scene-01": {
+    "audio_duration": 10.0,
+    "duration_with_padding": 11.0,
+    "frames": 330,
+    "seconds": 11.0
+  },
+  "scene-02": {
+    "audio_duration": 21.28,
+    "duration_with_padding": 22.28,
+    "frames": 690,
+    "seconds": 23.0
+  },
+  "scene-03": {
+    "audio_duration": 34.72,
+    "duration_with_padding": 35.72,
+    "frames": 1080,
+    "seconds": 36.0
+  },
+  "scene-04": {
+    "audio_duration": 37.76,
+    "duration_with_padding": 38.76,
+    "frames": 1170,
+    "seconds": 39.0
+  },
+  "scene-05": {
+    "audio_duration": 28.24,
+    "duration_with_padding": 29.24,
+    "frames": 900,
+    "seconds": 30.0
+  },
+  "scene-06": {
+    "audio_duration": 33.12,
+    "duration_with_padding": 34.12,
+    "frames": 1050,
+    "seconds": 35.0
+  },
+  "scene-07": {
+    "audio_duration": 35.2,
+    "duration_with_padding": 36.2,
+    "frames": 1110,
+    "seconds": 37.0
+  },
+  "scene-08": {
+    "audio_duration": 53.36,
+    "duration_with_padding": 54.36,
+    "frames": 1650,
+    "seconds": 55.0
+  },
+  "scene-09": {
+    "audio_duration": 40.96,
+    "duration_with_padding": 41.96,
+    "frames": 1260,
+    "seconds": 42.0
+  },
+  "scene-10": {
+    "audio_duration": 24.72,
+    "duration_with_padding": 25.72,
+    "frames": 780,
+    "seconds": 26.0
+  },
+  "scene-11": {
+    "audio_duration": 14.64,
+    "duration_with_padding": 15.64,
+    "frames": 480,
+    "seconds": 16.0
+  },
+  "_total": {
+    "frames": 10500,
+    "seconds": 350.0,
+    "minutes": 5.8
+  }
+}
