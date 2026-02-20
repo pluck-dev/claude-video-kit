@@ -9,19 +9,21 @@ TTS는 선택 사항(optional)이며, 직접 녹음을 선호하는 경우 이 �
 
 ## TTS 서비스 비교
 
-| 서비스 | 품질 | 한국어 지원 | 가격 | API |
-|--------|------|------------|------|-----|
-| ElevenLabs | ★★★★★ | ○ 양호 | $5/month~ | REST |
-| Google Cloud TTS | ★★★★ | ◎ 우수 | 무료 티어 있음 | REST / gRPC |
-| Azure TTS | ★★★★ | ◎ 우수 | 무료 티어 있음 | REST |
-| OpenAI TTS | ★★★★ | ○ 양호 | $15/1M chars | REST |
-| Edge TTS | ★★★ | ◎ 우수 | 완전 무료 | CLI |
-| Naver CLOVA | ★★★★ | ◎ 최우수 | 유료 | REST |
+| 서비스 | 품질 | 한국어 지원 | 가격 | API | 음성 클로닝 |
+|--------|------|------------|------|-----|------------|
+| Qwen3-TTS | ★★★★★ | ◎ 우수 | 완전 무료 | 로컬 CLI | ◎ 3초 샘플로 클로닝 |
+| ElevenLabs | ★★★★★ | ○ 양호 | $5/month~ | REST | ○ 유료 |
+| Google Cloud TTS | ★★★★ | ◎ 우수 | 무료 티어 있음 | REST / gRPC | ✗ |
+| Azure TTS | ★★★★ | ◎ 우수 | 무료 티어 있음 | REST | ○ 유료 |
+| OpenAI TTS | ★★★★ | ○ 양호 | $15/1M chars | REST | ✗ |
+| Edge TTS | ★★★ | ◎ 우수 | 완전 무료 | CLI | ✗ |
+| Naver CLOVA | ★★★★ | ◎ 최우수 | 유료 | REST | ✗ |
 
 ◎ = 우수 (자연스럽고 정확함), ○ = 양호 (사용 가능 수준)
 
 ### 서비스 선택 기준
 
+- **본인 목소리 클로닝 (무료)**: Qwen3-TTS (3~5초 샘플로 음성 복제, 로컬 실행)
 - **무료로 빠르게 시작**: Edge TTS (설치 후 즉시 사용)
 - **고품질 한국어**: Naver CLOVA 또는 Google Cloud TTS
 - **다국어 + 감정 표현**: ElevenLabs
@@ -99,15 +101,15 @@ SSML 태그 목록:
 ### 출력 파일 규칙
 
 ```
-public/audio/narration/
+{PUBLIC}/narration/
 ├── scene-01.mp3
 ├── scene-02.mp3
 ├── scene-03.mp3
 └── ...
 
 파일명 규칙: scene-{두자리숫자}.mp3
-샘플레이트: 44100Hz
-비트레이트: 128kbps 이상
+샘플레이트: 24000Hz (Qwen3-TTS 기본) 또는 44100Hz
+비트레이트: 128kbps 이상 (MP3 변환 시 192kbps 권장)
 채널: 모노 (스테레오 불필요)
 ```
 
@@ -118,53 +120,58 @@ public/audio/narration/
 나레이션 MP3 생성 후, 각 파일의 길이를 측정하여 `timing.json`을 생성한다.
 이 파일은 Remotion의 `durationInFrames` 계산에 활용된다.
 
-### `public/audio/narration/timing.json`
+### `{VIDEO}/timing.json`
 
 ```json
 {
-  "fps": 30,
-  "scenes": [
-    {
-      "id": "scene-01",
-      "file": "scene-01.mp3",
-      "duration": 15.2,
-      "durationInFrames": 456
-    },
-    {
-      "id": "scene-02",
-      "file": "scene-02.mp3",
-      "duration": 22.8,
-      "durationInFrames": 684
-    }
-  ],
-  "totalDuration": 38.0,
-  "totalDurationInFrames": 1140
+  "scene-01": {
+    "audio_duration": 10.0,
+    "duration_with_padding": 11.0,
+    "frames": 330,
+    "seconds": 11.0
+  },
+  "scene-02": {
+    "audio_duration": 21.28,
+    "duration_with_padding": 22.28,
+    "frames": 690,
+    "seconds": 23.0
+  },
+  "_total": {
+    "frames": 1020,
+    "seconds": 34.0,
+    "minutes": 0.57
+  }
 }
 ```
 
 ### durationInFrames 계산 공식
 
 ```
-durationInFrames = Math.ceil(duration × fps)
+1. ffprobe로 MP3 실제 길이(초) 측정
+2. 1초 여유(padding) 추가: duration_with_padding = audio_duration + 1.0
+3. 30프레임 단위로 올림: frames = Math.ceil(duration_with_padding * fps / 30) * 30
 
-예: 15.2초 × 30fps = Math.ceil(456) = 456프레임
+예: 21.28초 오디오 → +1초 = 22.28초 → 22.28 * 30 = 668.4 → 30단위 올림 = 690프레임 (23초)
 ```
 
-### MP3 길이 측정 명령어
+### MP3 길이 측정 및 timing.json 생성
 
 ```bash
 # ffprobe로 MP3 길이 측정
 ffprobe -v quiet -show_entries format=duration \
   -of default=noprint_wrappers=1:nokey=1 \
-  public/audio/narration/scene-01.mp3
+  {PUBLIC}/narration/scene-01.mp3
 
-# Python으로 일괄 측정 및 JSON 생성
+# Python으로 일괄 측정 및 timing.json 생성
 python3 -c "
-import os, json, subprocess
+import os, json, subprocess, math
 
-scenes = []
-narration_dir = 'public/audio/narration'
+narration_dir = '{PUBLIC}/narration'  # 실제 경로로 교체
+output_path = '{VIDEO}/timing.json'   # 실제 경로로 교체
 fps = 30
+
+timing = {}
+total_frames = 0
 
 for filename in sorted(os.listdir(narration_dir)):
     if filename.endswith('.mp3') and filename.startswith('scene-'):
@@ -174,23 +181,29 @@ for filename in sorted(os.listdir(narration_dir)):
              '-of', 'default=noprint_wrappers=1:nokey=1', filepath],
             capture_output=True, text=True
         )
-        duration = float(result.stdout.strip())
-        scene_id = filename.replace('.mp3', '')
-        scenes.append({
-            'id': scene_id,
-            'file': filename,
-            'duration': round(duration, 2),
-            'durationInFrames': int(duration * fps + 0.999)
-        })
+        audio_dur = round(float(result.stdout.strip()), 2)
+        padded = audio_dur + 1.0
+        frames = math.ceil(padded * fps / 30) * 30
+        seconds = frames / fps
 
-total = sum(s['duration'] for s in scenes)
-output = {
-    'fps': fps,
-    'scenes': scenes,
-    'totalDuration': round(total, 2),
-    'totalDurationInFrames': int(total * fps + 0.999)
+        scene_id = filename.replace('.mp3', '')
+        timing[scene_id] = {
+            'audio_duration': audio_dur,
+            'duration_with_padding': round(padded, 2),
+            'frames': frames,
+            'seconds': seconds
+        }
+        total_frames += frames
+
+timing['_total'] = {
+    'frames': total_frames,
+    'seconds': round(total_frames / fps, 1),
+    'minutes': round(total_frames / fps / 60, 1)
 }
-print(json.dumps(output, indent=2, ensure_ascii=False))
+
+with open(output_path, 'w') as f:
+    json.dump(timing, f, indent=2, ensure_ascii=False)
+print(json.dumps(timing, indent=2, ensure_ascii=False))
 "
 ```
 
@@ -230,6 +243,116 @@ credentials/
 *.pem
 *.json.key
 ```
+
+---
+
+## Qwen3-TTS (로컬 음성 클로닝)
+
+Qwen3-TTS는 Alibaba Qwen 팀이 개발한 오픈소스 TTS 모델로,
+3~5초의 짧은 음성 샘플만으로 본인 목소리를 클로닝할 수 있다.
+완전 무료이며 로컬에서 실행되어 API 키가 필요 없다.
+
+### 설치
+
+```bash
+# 필수 패키지
+pip install -U qwen-tts
+
+# MP3 변환용 (선택)
+brew install ffmpeg
+```
+
+- Python >= 3.9 필요 (macOS 기본 Python이 아닌 별도 설치 버전 사용 권장, 예: Python 3.11)
+- **Apple Silicon: MPS 비호환** — `matmul` 차원 오류 발생. 반드시 **CPU 모드**(`device_map="cpu"`, `dtype=torch.float32`)로 실행
+- 0.6B 모델: ~3GB RAM / 1.7B 모델: ~6GB RAM
+- 모델은 최초 실행 시 HuggingFace에서 자동 다운로드 (~2.5GB)
+
+### 음성 샘플 (레퍼런스 오디오) 준비 가이드
+
+좋은 음성 클로닝 결과를 위한 녹음 가이드:
+
+```
+권장 사양:
+- 길이: 10~30초 (최소 3초, 길수록 품질 향상)
+- 포맷: wav 또는 mp3 (44100Hz, 모노 권장)
+- 환경: 조용한 공간, 반향 없는 곳
+- 내용: 자연스럽게 읽는 문장 (감정 표현 포함 가능)
+- 금지: 배경 음악, 노이즈, 여러 사람 목소리
+
+녹음 도구:
+- macOS: QuickTime Player → 새로운 오디오 녹음
+- 스마트폰: 기본 녹음 앱 (조용한 환경에서)
+- 전문: Audacity (무료, 노이즈 제거 기능)
+```
+
+### 레퍼런스 오디오 저장 경로
+
+```
+{PUBLIC}/assets/
+├── my-voice.wav           ← 본인 목소리 레퍼런스 (10~30초)
+└── my-voice.m4a           ← 원본 녹음 (변환 전 백업)
+```
+
+- 한 프로젝트에서 동일한 레퍼런스를 사용 (목소리 일관성)
+- assets/ 폴더는 git에 포함 (공유 가능)
+- `x_vector_only_mode=True` 사용 시 레퍼런스 텍스트(대사) 불필요 — 음성 특성만 추출
+
+### Python API (권장 방식)
+
+프로젝트별 `scripts/generate-tts.py`를 생성하여 씬별 나레이션을 일괄 생성한다.
+
+```python
+from qwen_tts import Qwen3TTSModel
+import torch, soundfile as sf
+
+# 모델 로드 (MPS 비호환 → CPU 필수)
+model = Qwen3TTSModel.from_pretrained(
+    "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
+    device_map="cpu",
+    dtype=torch.float32,
+)
+
+# 음성 클론 프롬프트 (x_vector_only_mode: 레퍼런스 텍스트 불필요)
+voice_prompt = model.create_voice_clone_prompt(
+    ref_audio="{PUBLIC}/assets/my-voice.wav",
+    x_vector_only_mode=True,
+)
+
+# 나레이션 생성
+wavs, sr = model.generate_voice_clone(
+    text="안녕하세요. 오늘은 연말정산 꿀팁을 알려드릴게요.",
+    language="Korean",
+    voice_clone_prompt=voice_prompt,
+)
+
+# WAV 저장 → ffmpeg로 MP3 변환
+sf.write("scene-01.wav", wavs[0], sr)
+# ffmpeg -y -i scene-01.wav -codec:a libmp3lame -b:a 192k scene-01.mp3
+```
+
+### 실행 방법
+
+```bash
+# 전체 씬 일괄 생성 (Python 3.11 사용 — macOS 기본 Python은 호환성 문제 가능)
+/Library/Frameworks/Python.framework/Versions/3.11/bin/python3 scripts/generate-tts.py
+
+# 특정 씬만 재생성
+python3 scripts/generate-tts.py scene-03 scene-07
+```
+
+### 주요 주의사항
+
+- **MPS(Apple Metal) 사용 불가**: `loc("mps_matmul")` 차원 오류 발생. 반드시 `device_map="cpu"` 사용
+- **Python 버전**: macOS 기본 Python(3.14 등)에 qwen-tts가 설치 안 될 수 있음. `python3.11` 등 별도 버전 경로 지정
+- **x_vector_only_mode=True**: 레퍼런스 오디오의 대사 텍스트를 몰라도 음성 특성만으로 클로닝 가능
+- CPU 모드에서 11개 씬(~5.5분 분량) 생성에 약 8~10분 소요
+
+### 모델 비교
+
+| 모델 | 크기 | RAM | 용도 |
+|------|------|-----|------|
+| `base-0.6b` (기본) | 0.6B | ~3GB | 빠른 생성, 일반 품질 |
+| `base-1.7b` | 1.7B | ~6GB | 높은 품질, 더 자연스러운 억양 |
 
 ---
 
