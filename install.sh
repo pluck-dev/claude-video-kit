@@ -75,8 +75,18 @@ mkdir -p "$SKILLS_DIR" "$COMMANDS_DIR" "$AGENTS_DIR"
 # PART 1: Claude Code 설정 (~/.claude/)
 # ═══════════════════════════════════════════
 
-# ── 1/4: 스킬 (6개) ──
-echo -e "${CYAN}[1/4] 스킬 설치 (6개)${NC}"
+# ── 0/5: 스크립트 ──
+echo -e "${CYAN}[0/5] 헬퍼 스크립트 설치${NC}"
+
+SCRIPTS_DIR="$CLAUDE_DIR/scripts"
+mkdir -p "$SCRIPTS_DIR"
+
+copy_file "scripts/qwen3-tts.py" "$SCRIPTS_DIR/qwen3-tts.py" && echo -e "  ${GREEN}[OK]${NC} qwen3-tts.py — Qwen3-TTS 음성 클로닝"
+
+echo ""
+
+# ── 1/5: 스킬 (6개) ──
+echo -e "${CYAN}[1/5] 스킬 설치 (6개)${NC}"
 
 SKILLS=(
     "skills/video-orchestra.md|비디오 프로덕션 오케스트레이터 (모노레포)"
@@ -94,9 +104,9 @@ for entry in "${SKILLS[@]}"; do
     copy_file "$src" "$SKILLS_DIR/$file" && echo -e "  ${GREEN}[OK]${NC} $file — $desc"
 done
 
-# ── 2/4: 커맨드 (10개) ──
+# ── 2/5: 커맨드 (10개) ──
 echo ""
-echo -e "${CYAN}[2/4] 커맨드 설치 (10개)${NC}"
+echo -e "${CYAN}[2/5] 커맨드 설치 (10개)${NC}"
 
 COMMANDS=(
     "commands/video.md|/video — 오케스트레이터 (모노레포)"
@@ -118,9 +128,9 @@ for entry in "${COMMANDS[@]}"; do
     copy_file "$src" "$COMMANDS_DIR/$file" && echo -e "  ${GREEN}[OK]${NC} $file — $desc"
 done
 
-# ── 3/4: 에이전트 (3개) ──
+# ── 3/5: 에이전트 (3개) ──
 echo ""
-echo -e "${CYAN}[3/4] 에이전트 설치 (3개)${NC}"
+echo -e "${CYAN}[3/5] 에이전트 설치 (3개)${NC}"
 
 AGENTS=(
     "agents/script-writer.md|스크립트 작성 전문가"
@@ -135,9 +145,9 @@ for entry in "${AGENTS[@]}"; do
     copy_file "$src" "$AGENTS_DIR/$file" && echo -e "  ${GREEN}[OK]${NC} $file — $desc"
 done
 
-# ── 4/4: CLAUDE.md 규칙 ──
+# ── 4/5: CLAUDE.md 규칙 ──
 echo ""
-echo -e "${CYAN}[4/4] CLAUDE.md 규칙 추가${NC}"
+echo -e "${CYAN}[4/5] CLAUDE.md 규칙 추가${NC}"
 
 CLAUDE_MD="$CLAUDE_DIR/CLAUDE.md"
 VIDEO_MARKER="<!-- VIDEO-KIT:START -->"
@@ -203,6 +213,14 @@ fi
 echo "$VERSION" > "$CLAUDE_DIR/.video-kit-version"
 echo -e "  ${GREEN}[OK]${NC} 버전 기록: v${VERSION}"
 
+# ── 5/5: Qwen3-TTS 안내 (선택) ──
+echo ""
+echo -e "${CYAN}[5/5] Qwen3-TTS (선택 설치)${NC}"
+echo -e "  음성 클로닝 TTS를 사용하려면 아래를 실행하세요:"
+echo -e "  ${YELLOW}pip install -U qwen-tts${NC}"
+echo -e "  ${YELLOW}brew install ffmpeg${NC}  (MP3 변환용)"
+echo -e "  헬퍼 스크립트: ${GREEN}~/.claude/scripts/qwen3-tts.py${NC}"
+
 # ═══════════════════════════════════════════
 # 완료 리포트
 # ═══════════════════════════════════════════
@@ -211,7 +229,7 @@ echo -e "${BLUE}═════════════════════�
 echo -e "${GREEN}설치 완료! (v${VERSION} 모노레포)${NC}"
 echo ""
 echo -e "${CYAN}Claude Code 설정:${NC}"
-echo "  스킬 6개 + 커맨드 10개 + 에이전트 3개"
+echo "  스킬 6개 + 커맨드 10개 + 에이전트 3개 + 스크립트 1개"
 echo ""
 echo "  사용 가능한 명령어:"
 echo "    /video init [cat/name]     새 영상 초기화 (예: tutorials/react-hooks)"
@@ -228,6 +246,7 @@ echo "    /render-video              비디오 렌더링"
 echo "    /gen-thumbnail             썸네일 생성"
 echo "    /video-seo                 YouTube SEO 메타데이터"
 echo "    /gen-tts                   TTS 나레이션 생성"
+echo "    /gen-tts --service qwen3   음성 클로닝 TTS (로컬)"
 echo "    /video-sync                산출물 동기화 체크"
 echo "    /to-shorts                 롱폼→숏폼 변환"
 echo ""
