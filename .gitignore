@@ -21,3 +21,10 @@ Thumbs.db
 
 # Remotion 출력물
 output/
+
+# 현재 영상 선택 (개인 설정)
+.current-video
+
+# 임시 파일
+docs.md
+test-ref/
