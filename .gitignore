@@ -28,3 +28,7 @@ output/
 # 임시 파일
 docs.md
 test-ref/
+
+# Python
+__pycache__/
+*.pyc

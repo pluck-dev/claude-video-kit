@@ -637,6 +637,12 @@ TTS 생성 진행 시:
 1. /gen-tts 스킬 호출
    - 입력: {VIDEO}/scripts/[프로젝트명]-script.md
    - 출력: {PUBLIC}/narration/scene-NN.mp3
+   - 서비스 옵션:
+     - Edge TTS (기본, 무료)
+     - Qwen3-TTS (음성 클로닝, 무료, 로컬)
+       → --service qwen3 --ref-audio {PUBLIC}/reference/my-voice.wav
+       → 본인 목소리로 나레이션 생성 가능 (3초 샘플이면 충분)
+     - ElevenLabs/Google/Azure/OpenAI (유료)
 2. 씬별 나레이션 파일 생성
 3. 각 파일의 실제 재생 시간 측정 → {VIDEO}/storyboard/INDEX.md에 기록
 4. 볼륨 정규화 확인 (-14 LUFS 기준)
